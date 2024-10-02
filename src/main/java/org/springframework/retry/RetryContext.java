@@ -61,7 +61,7 @@ public interface RetryContext extends AttributeAccessor {
 	 */
 	void setExhaustedOnly();
 
-	/**
+	/** 决定重试是否耗尽
 	 * Public accessor for the exhausted flag {@link #setExhaustedOnly()}.
 	 * @return true if the flag has been set.
 	 */

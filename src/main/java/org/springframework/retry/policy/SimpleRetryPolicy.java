@@ -166,7 +166,8 @@ public class SimpleRetryPolicy implements RetryPolicy {
 	 */
 	@Override
 	public boolean canRetry(RetryContext context) {
-		Throwable t = context.getLastThrowable();
+		Throwable t = context.getLastThrowable(); // 获取上次异常
+		// 如果上次异常为空 或者 上次异常是可重试的 并且 重试次数小于最大重试次数
 		return (t == null || retryForException(t)) && context.getRetryCount() < getMaxAttempts();
 	}
 

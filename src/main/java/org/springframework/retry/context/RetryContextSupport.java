@@ -32,7 +32,7 @@ public class RetryContextSupport extends AttributeAccessorSupport implements Ret
 
 	private volatile int count;
 
-	private volatile Throwable lastException;
+	private volatile Throwable lastException; // 上次异常
 
 	public RetryContextSupport(RetryContext parent) {
 		super();

@@ -275,14 +275,14 @@ public class RetryTemplate implements RetryOperations {
 		BackOffPolicy backOffPolicy = this.backOffPolicy;
 
 		// Allow the retry policy to initialise itself...
-		RetryContext context = open(retryPolicy, state);
+		RetryContext context = open(retryPolicy, state); //[RetryContext: count=0, lastException=null, exhausted=false]
 		if (this.logger.isTraceEnabled()) {
 			this.logger.trace("RetryContext retrieved: " + context);
 		}
 
 		// Make sure the context is available globally for clients who need
 		// it...
-		RetrySynchronizationManager.register(context);
+		RetrySynchronizationManager.register(context); // 注册上=上下文
 
 		Throwable lastException = null;
 
@@ -298,7 +298,7 @@ public class RetryTemplate implements RetryOperations {
 
 			// Get or Start the backoff context...
 			BackOffContext backOffContext = null;
-			Object resource = context.getAttribute("backOffContext");
+			Object resource = context.getAttribute("backOffContext"); // [RetryContext: count=0, lastException=null, exhausted=false]
 
 			if (resource instanceof BackOffContext) {
 				backOffContext = (BackOffContext) resource;
@@ -332,18 +332,19 @@ public class RetryTemplate implements RetryOperations {
 
 					lastException = e;
 
-					try {
+					try {// 注册异常信息到RetryContext中，便于后续的判断和处理
 						registerThrowable(retryPolicy, state, context, e);
 					}
 					catch (Exception ex) {
 						throw new TerminatedRetryException("Could not register throwable", ex);
 					}
-					finally {
+					finally { // 异常后执行所有的监听器
 						doOnErrorInterceptors(retryCallback, context, e);
 					}
 
 					if (canRetry(retryPolicy, context) && !context.isExhaustedOnly()) {
 						try {
+							//
 							backOffPolicy.backOff(backOffContext);
 						}
 						catch (BackOffInterruptedException ex) {
@@ -393,12 +394,12 @@ public class RetryTemplate implements RetryOperations {
 		finally {
 			close(retryPolicy, context, state, lastException == null || exhausted);
 			doCloseInterceptors(retryCallback, context, lastException);
-			RetrySynchronizationManager.clear();
+			RetrySynchronizationManager.clear(); // 清理当前线程的上下文信息
 		}
 
 	}
 
-	/**
+	/** 决定是否重试
 	 * Decide whether to proceed with the ongoing retry attempt. This method is called
 	 * before the {@link RetryCallback} is executed, but after the backoff and open
 	 * interceptors.
@@ -536,7 +537,7 @@ public class RetryTemplate implements RetryOperations {
 			this.retryContextCache.remove(state.getKey());
 		}
 		if (recoveryCallback != null) {
-			T recovered = recoveryCallback.recover(context);
+			T recovered = recoveryCallback.recover(context); // 重试次数耗尽之后，如果设置了恢复回调，则执行恢复回调
 			context.setAttribute(RetryContext.RECOVERED, true);
 			return recovered;
 		}
@@ -576,7 +577,7 @@ public class RetryTemplate implements RetryOperations {
 		boolean result = true;
 
 		for (RetryListener listener : this.listeners) {
-			result = result && listener.open(context, callback);
+			result = result && listener.open(context, callback); // 回调所有监听器的open方法
 		}
 
 		return result;
@@ -586,14 +587,14 @@ public class RetryTemplate implements RetryOperations {
 	private <T, E extends Throwable> void doCloseInterceptors(RetryCallback<T, E> callback, RetryContext context,
 			Throwable lastException) {
 		for (int i = this.listeners.length; i-- > 0;) {
-			this.listeners[i].close(context, callback, lastException);
+			this.listeners[i].close(context, callback, lastException); // 回调所有的监听器的close方法
 		}
 	}
 
 	private <T, E extends Throwable> void doOnErrorInterceptors(RetryCallback<T, E> callback, RetryContext context,
 			Throwable throwable) {
 		for (int i = this.listeners.length; i-- > 0;) {
-			this.listeners[i].onError(context, callback, throwable);
+			this.listeners[i].onError(context, callback, throwable); // 回调所有的监听器的close方法
 		}
 	}
 

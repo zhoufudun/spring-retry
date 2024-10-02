@@ -34,7 +34,7 @@ import java.util.concurrent.ConcurrentMap;
  */
 @SuppressWarnings("serial")
 public class SubclassClassifier<T, C> implements Classifier<T, C> {
-
+	// {class java.lang.Exception=true}
 	private ConcurrentMap<Class<? extends T>, C> classified = new ConcurrentHashMap<Class<? extends T>, C>();
 
 	private C defaultValue = null;
@@ -107,7 +107,7 @@ public class SubclassClassifier<T, C> implements Classifier<T, C> {
 		if (classifiable == null) {
 			return this.defaultValue;
 		}
-
+		// class java.lang.IllegalArgumentException
 		@SuppressWarnings("unchecked")
 		Class<? extends T> exceptionClass = (Class<? extends T>) classifiable.getClass();
 		if (this.classified.containsKey(exceptionClass)) {
@@ -134,7 +134,7 @@ public class SubclassClassifier<T, C> implements Classifier<T, C> {
 
 		// ConcurrentHashMap doesn't allow nulls
 		if (value != null) {
-			this.classified.put(exceptionClass, value);
+			this.classified.put(exceptionClass, value); // key=class java.lang.IllegalArgumentException  value=true
 		}
 
 		if (value == null) {
